@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Palo Alto Status</title>
+<meta charset="utf-8" />
+<meta name="description" content="A" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="index, follow, archive, noimageindex">
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0" />
+<style>
+table	{ width: 100%; border-spacing: 2px; border-collapse: collapse; border: 1px solid black; }
+p,th,td	{ font-family: arial; text-align: left; font-size: 10px; border: 1px solid black; padding: 4px; }
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+    font-family: arial;
+    font-size: 10px;
+}
+.wrapper{
+    margin: auto;
+    width: 100%;
+    max-width: 1000px;
+    padding:10px;
+    background-color: #cccccc;
+}
+input {
+    width: 15%;
+}
+fieldset {
+    width: 15%;
+    display: inline-block;
+    box-sizing: border-box;
+    font-family: arial;
+    font-size: 10px;
+}
+fieldset input {
+    width: 100%;
+}
+</style>
+</head>
+<body>
+  <!-- Begin Form -->
+  <form method="get" action="middle.html" target="middle_iframe">
+  <fieldset>
+    <legend>Location:</legend>
+    <select name="location" id="location_list" size=1>
+      <option value="" selected>All Locations</option>
+      {% for _ in locations %}
+        <option value="{{_}}"{% if _ == location %} selected{% endif %}>{{_}}</option>
+      {% endfor %}
+    </select>
+  </fieldset>
+  <fieldset>
+    <legend>Server:</legend>
+    <select name="server" id="server_list" size=1>
+      <option value="" selected>All Servers</option>
+      {% for _ in servers %}
+        <option value="{{_}}"}>{{_}}</option>
+      {% endfor %}
+    </select>
+  </fieldset>
+  <fieldset>
+    <legend>Client IP Address:</legend>
+    <select name="client_ip" id="client_ip_list" size=1>
+      <option value="" selected>All Clients</option>
+      {% for _ in client_ips %}
+        <option value="{{_}}"}>{{_}}</option>
+      {% endfor %}
+    </select>
+  </fieldset>
+  <fieldset>
+    <legend>Response Code:</legend>
+    <select name="status_code" id="status_code_list" size=1>
+      <option value="" selected>All Status Codes</option>
+      {% for _ in status_codes %}
+        <option value="{{_}}">{{_}}</option>
+      {% endfor %}
+    </select>
+  </fieldset>
+  <fieldset>
+    <legend>Interval:</legend>
+    <select name="interval" id="interval_list" size=1>
+      {% for k, v in intervals.items() %}
+        <option value="{{k}}"{% if k == interval %} selected{% endif %}>{{v}}</option>
+      {% endfor %}
+    </select>
+  </fieldset>
+  <input type='hidden' name="end_time" id="end_time"></select>
+  <input type="submit" value="Show Data">
+  <input type="reset" value="Reset Options">
+  </form>
+  <!-- End Form -->
+<script>
+
+var params = {}
+location.search.substr(1).split("&").forEach(function(item) {
+  params[item.split("=")[0]] = item.split("=")[1];
+});
+
+(async() => {
+
+  // Get current date/time
+  const now = Date.now();
+  document.getElementById('end_time').value = Math.round(now / 1000);
+
+  // If Locations drop-down changes, refresh this frame's query string
+  const selector = document.getElementById('location_list');
+  selector.onchange = (event) => {
+    params['location'] = event.target.value;
+    self.location.search = "?location=" + params['location'];
+  }
+
+})();
+
+</script>
+</body>
+</html>

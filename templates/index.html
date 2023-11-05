@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>CheckPoint VPNs</title>
+<meta charset="utf-8" />
+<meta name="description" content="A" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="index, follow, archive, noimageindex">
+<meta http-equiv="Cache-Control" content="no-cache"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0" />
+<style>
+table	{ width: 100%; border-spacing: 2px; border-collapse: collapse; border: 1px solid black; }
+p,th,td	{ font-family: arial; text-align: left; font-size: 10px; border: 1px solid black; padding: 4px; }
+tr.even td { background-color: #f8f8f8; }
+tr.odd td { background-color:#dfdfdf; }
+</style>
+</head>
+<body>
+<form id="device_selector" method="GET" action="">
+    <fieldset>
+        <legend>Device:</legend>
+        <select name="device_name" id="device_list">
+            <option value="">All Devices</option>
+            {% for device in device_list %}
+            <option value="{{device.hostname}}"{% if device.hostname == device_name %} selected{% endif %}>{{device.hostname}}</option>
+            {% endfor %}
+        </select>
+    </fieldset>
+    <fieldset>
+      <legend>Command:</legend>
+      <select name="command" id="command_list">
+          <option value="">All Commands</option>
+          {% for k,v in commands.items() %}
+          <option value="{{k}}"{% if k == command %} selected{% endif %}>{{v}}</option>
+          {% endfor %}
+      </select>
+  </fieldset>
+  <input type=submit></form>
+</form>
+<table style="width:100%", border="1">
+{%if data|length > 0 %}
+  <tr>
+    {% for k,v in data[0].items() %}
+      <th>{{k}}</th>
+    {% endfor %}
+  </tr>
+{% endif %}
+{% for row in data %}
+  <tr>
+    {%if loop.index is divisibleby 2 %}
+      <tr class="even">
+    {% else %}
+      <tr class="odd">
+    {% endif %}
+    {% for k,v in row.items() %}
+      <td>{{v}}</td>
+    {% endfor %}
+  </tr>
+{% endfor %}
+</table>
+</body>
+</html>

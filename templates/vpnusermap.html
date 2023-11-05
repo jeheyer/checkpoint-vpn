@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Current VPN user map</title>
+    <meta http-equiv="Cache-Control" content="no-cache"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0" />
+    <style> #map { height: 95%; } html,body { height: 100%; }</style>
+</head>
+<body>
+<script>
+	
+// Google maps API requires HTTPS refer
+if (location.protocol !== 'https:' ) {
+    // Form HTTPS URL and redirect to it
+    let newURL = 'https://' + window.location.hostname + window.location.pathname + window.location.search;
+    window.location.replace(newURL);
+}
+
+var get_params = {}
+location.search.substr(1).split("&").forEach(function(item) {
+  get_params[item.split("=")[0]] = item.split("=")[1];
+});
+
+const MakeAjaxCall = async (url, options) => {
+
+    if (options == undefined)
+        options = {method: 'GET', mode: 'cors', cache: 'no-cache'};
+
+    const ajax_request = new Request(url, options);
+    const ajax_response = await fetch(ajax_request);
+
+    if (ajax_response.ok) {
+        const json_data = await ajax_response.json();
+        return Promise.resolve(json_data);
+    } else {
+        return Promise.reject('Ajax call failed:', ajax_request);
+   }
+}
+
+</script>
+
+<!-- Begin device drop-down form -->
+<form id="device_selector" method="GET" action="">
+<fieldset>
+    <legend>Device:</legend>
+    <select name="device_name" id="device_list">
+        <option value="">All Devices</option>
+        {% for device in device_list %}
+        <option value="{{device.hostname}}"{% if device.hostname == device_name %} selected{% endif %}>{{device.hostname}}</option>
+        {% endfor %}
+    </select>
+</fieldset>
+<input type=submit></form>
+<!-- End device drop-down form -->
+
+<!-- Load Google Maps Functions -->
+<script src="https://code.whamola.net/js/map-functions.js"></script>
+
+<script>
+  // Initialize locations array
+  var locations = new Array();	 
+  locations[0] = { title: "My Location", lat: null, lng: null};
+</script>
+
+<!-- Initialize Map -->
+<div id='map'>
+<script src="https://maps.googleapis.com/maps/api/js?key={{google_maps_api_key}}&callback=initMap"></script>
+</div>
+
+<script>
+
+  function PlotSession(session, geoip) {
+    //console.log(session, geoip);
+    if (geoip.country_code) {
+      let location_info = {};
+      location_info.title = session.username;
+      random_offset = Math.round(Math.random() * 10) / 2000;
+      random_offset *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
+      location_info.lat = geoip.lat + random_offset;
+      location_info.lng = geoip.lng + random_offset;
+      location_info.details = `<b>${session.username}</b><br>`;
+      location_info.details += `Login: ${session.username}<br>`;
+      location_info.details += `Computer Name: ${session.computer}<br>`;
+      location_info.details += `Private IP: ${session.virtual_ip}<br>`;
+      location_info.details += `Public IP: ${session.public_ip}<br>`;
+
+      // Add GeoIP data
+      location_info.details += `ISP: ${geoip.isp_name}<br>`;
+      location_info.details += `Location: `;
+
+      // And City and State/Region 
+      if (geoip.city)
+        location_info.details += `${geoip.city}</abbr>`;
+      if (geoip.region_code)
+        location_info.details += `, <abbr title="${geoip.region_name}">${geoip.region_code}</abbr>`;
+      location_info.details += ` <abbr title="${geoip.country_name}">${geoip.country_code}</abbr><br>`;
+
+      // Plot Map Marker
+      PlotMarker(location_info);
+      map.fitBounds(bounds);
+    }
+  }
+
+  // Retrieve Remote Access session data
+  (async() => {
+
+    let wsgi_script = "./panxml2json";
+    let params = "command=show_global-protect-gateway_current-user"
+    if (get_params["device_name"])
+        params += "&device_name=" + get_params["device_name"];
+
+    MakeAjaxCall(wsgi_script + "?" + params).then(user_sessions => {
+        let geoip_url = "https://code.whamola.net/geoip";
+        for (const user_info of user_sessions) {            
+            geoip_url += "/" + user_info.public_ip;
+        }
+        var geoip_table = {};
+        MakeAjaxCall(geoip_url).then(geoip_data => {
+            for (const geoip of geoip_data) {
+                geoip_table[geoip.ipv4_address] = geoip;
+            }
+            for (const user_info of user_sessions) {
+                geoip = geoip_table[user_info.public_ip];
+                PlotSession(user_info, geoip);
+            }
+        }).catch(console.log)
+    }).catch(console.log)
+        
+    // Re-zoom map boundary one final time
+    map.panToBounds(bounds);
+
+  })();
+</script>
+
+</body>
+</html> 
