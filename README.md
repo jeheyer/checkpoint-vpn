@@ -64,10 +64,12 @@ docker run -p 8000:8000 --name checkpoint-vpn checkpoint-vpn
 
 ## Reference
 
-Offical Website
+CheckPoint Documentation
 
 - [R81.20 Management API Reference](https://sc1.checkpoint.com/documents/latest/APIs/index.html#introduction~v1.9.1%20)
 - [R81.10 Management API Reference](https://sc1.checkpoint.com/documents/latest/APIs/index.html#introduction~v1.8.1%20)
+
+[Getting Started with CheckPoint Management API](https://layer77.net/2023/06/03/getting-started-with-checkpoint-r81-10-management-api/)
 
 
 ## Changelog
