@@ -24,7 +24,8 @@ async def read_settings(settings_file=SETTINGS_FILE):
     if path.is_file():
         with open(settings_file) as file:
             return load(file, Loader=FullLoader)
-    return
+
+    return DEFAULTS
 
 
 async def do_login(mgmt_server: str, username: str, password: str):
@@ -157,7 +158,6 @@ async def get_mgmt_servers():
 
     try:
         settings = await read_settings()
-        assert settings
         return settings.get('management_servers', DEFAULTS['management_servers'])
     except Exception as e:
         raise e
