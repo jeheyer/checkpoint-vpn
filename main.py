@@ -7,7 +7,7 @@ from pathlib import Path
 
 SETTINGS_FILE = "./settings.yaml"
 DEFAULTS = {
-    'management_servers': [{'hostname': "localhost", 'port': 443}]
+    'management_servers': {'localhost-443': {'hostname': "localhost", 'port': 443}}
 }
 MIN_VERSION = "1.8.1"
 VERIFY_SSL = False
@@ -208,3 +208,4 @@ async def main(mgmt_server: dict, sid: str):
 
 if __name__ == "__main__":
     run(main())
+
